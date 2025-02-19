@@ -1,0 +1,111 @@
+x-app-main:
+  &app-main
+  networks:
+    - external-net
+
+services:
+  backend:
+    <<: *app-main
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    hostname: backend
+    container_name: ${APP_NAME}_backend
+    restart: always
+    depends_on:
+      - postgres
+      - elasticsearch
+    env_file:
+      - ../env/.env.${ENV}
+    command: >
+      /bin/bash -c "poetry run python manage.py migrate --noinput
+      && poetry run python manage.py collectstatic --noinput
+      & wait
+      && poetry run gunicorn core.wsgi --reload --bind=0.0.0.0:8000 --workers=1 --log-level=$${LOG_LEVEL}"
+    ports:
+      - '8000:8000'
+    volumes:
+      - ../:/home/app
+      - static-volume:/home/app/staticfiles
+    profiles: [main, secondary]
+
+  postgres:
+    <<: *app-main
+    image: postgres:16
+    shm_size: '1gb'
+    hostname: postgres
+    container_name: ${APP_NAME}_postgres
+    restart: on-failure
+    ports:
+      - '5433:5432'
+    env_file:
+      - ../env/.env.${ENV}
+    volumes:
+      - db-postgres:/var/lib/postgresql/data
+      - ../scripts/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql
+    profiles: [main, secondary]
+
+  test_postgres:
+    <<: *app-main
+    image: postgres:16
+    shm_size: '1gb'
+    hostname: test_postgres
+    container_name: ${APP_NAME}_test_postgres
+    restart: on-failure
+    environment:
+      POSTGRES_DB: ${APP_NAME}_database
+      POSTGRES_USER: ${APP_NAME}_user
+      POSTGRES_PASSWORD: ${APP_NAME}_password
+      POSTGRES_PORT: 5434
+      POSTGRES_HOST: test_postgres
+    ports:
+      - '5435:5434'
+    volumes:
+      - test-postgres:/var/lib/postgresql/data
+      - ../scripts/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql
+    profiles: [main, secondary]
+
+  elasticsearch:
+    <<: *app-main
+    image: elasticsearch:8.16.3
+    container_name: ${APP_NAME}_elasticsearch
+    restart: always
+    environment:
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch
+    profiles: [main]
+
+  nginx:
+    <<: *app-main
+    image: nginx:1.25
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static-volume:/home/static
+    container_name: ${APP_NAME}_nginx
+    restart: on-failure
+    ports:
+      - '1337:80'
+    depends_on:
+      - backend
+    profiles: [main]
+
+volumes:
+  static-volume:
+  db-postgres:
+  test-postgres:
+  elasticsearch-data:
+
+networks:
+  external-net:
+    name: external-net
