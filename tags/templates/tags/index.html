@@ -1,0 +1,27 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h1>Загрузка изображения</h1>
+
+<form method="post" enctype="multipart/form-data" style="margin-top: 50px; margin-bottom: 30px;">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" id="btnUpload" class="btn btn-primary mt-3">Загрузить</button>
+</form>
+
+{% if image_uri is not None %}
+    {% if predicted_labels is not None %}
+        <div class="alert alert-primary" role="alert">
+            Теги: <b>{{ predicted_labels }}</b>
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            Ошибка: теги не распознаны.
+        </div>
+    {% endif %}
+
+    <img src="{{ image_uri }}" class="img-fluid" alt="Uploaded image"
+         style="max-width: min(500px, 100%); height: auto; margin-top: 30px;">
+{% endif %}
+
+{% endblock %}
