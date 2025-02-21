@@ -6,7 +6,7 @@ from core import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tags/', include('tags.urls')),
+    path('tags/', include('tags.urls', namespace='tags')),
 ]
 
 urlpatterns += static(settings.base.MEDIA_URL, document_root=settings.base.MEDIA_ROOT)

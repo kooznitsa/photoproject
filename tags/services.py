@@ -19,7 +19,7 @@ info_logger = logging.getLogger('info_logger')
 error_logger = logging.getLogger('error_logger')
 
 # Load as global variable here to avoid expensive reloads with each request
-model = models.efficientnet_v2_s(weights=models.EfficientNet_V2_S_Weights)
+model = models.efficientnet_v2_s(weights=models.EfficientNet_V2_S_Weights.IMAGENET1K_V1)
 model.eval()
 
 # https://pytorch.org/vision/main/models/generated/torchvision.models.efficientnet_v2_s.html
@@ -41,23 +41,21 @@ class UploadImageService:
         Upload an image.
         Return image URI and predicted tags.
         """
-        predicted_labels = None
+        predicted_label = None
         image_bytes = image.file.read()
         encoded_img = base64.b64encode(image_bytes).decode('ascii')
         image_uri = 'data:%s;base64,%s' % ('image/jpeg', encoded_img)
 
-        info_logger.info(f'Image type: {type(image)}')
-
         try:
-            predicted_labels = TagsGeneratorService().get_prediction(image_bytes)
+            predicted_label = TagsGeneratorService().get_prediction(image_bytes)
         except RuntimeError as e:
             error_logger.error(e)
 
-        return image_uri, predicted_labels
+        return image_uri, predicted_label
 
 
 class TagsGeneratorService:
-    def get_prediction(self, image_bytes: bytes) -> list[str]:
+    def get_prediction(self, image_bytes: bytes) -> str:
         """For given image bytes, predict the label using a model."""
         tensor = self._transform_image(image_bytes)
         outputs = model.forward(tensor)
@@ -69,7 +67,7 @@ class TagsGeneratorService:
     @staticmethod
     def _transform_image(image_bytes: bytes) -> torch.Tensor:
         """
-        Transform image into required format with 3 RGB channels and normalized.
+        Transform image into required format and normalize.
         Return the corresponding tensor.
         """
         my_transforms = transforms.Compose([
@@ -77,8 +75,8 @@ class TagsGeneratorService:
             transforms.CenterCrop(EFFICIENTNET_V2_S_PARAMS['crop']),
             transforms.ToTensor(),
             transforms.Normalize(
-                EFFICIENTNET_V2_S_PARAMS['mean'],
-                EFFICIENTNET_V2_S_PARAMS['std'],
+                mean=EFFICIENTNET_V2_S_PARAMS['mean'],
+                std=EFFICIENTNET_V2_S_PARAMS['std'],
             ),
         ])
         image = Image.open(io.BytesIO(image_bytes))
@@ -87,11 +85,9 @@ class TagsGeneratorService:
 
 class TranslatorService:
     @staticmethod
-    async def translate_to_russian(terms: str) -> list[str]:
-        """Translate terms from English to Russian."""
+    async def translate_to_russian(term: str) -> str:
+        """Translate term from English to Russian."""
         async with Translator() as translator:
-            translated_terms = []
-            for term in terms.split('_'):
-                translated_term = await translator.translate(term, dest='ru')
-                translated_terms.append(translated_term.text)
-            return translated_terms
+            term = term.replace('_', ' ')
+            translated_term = await translator.translate(term, dest='ru')
+            return translated_term.text

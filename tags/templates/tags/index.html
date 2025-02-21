@@ -10,13 +10,13 @@
 </form>
 
 {% if image_uri is not None %}
-    {% if predicted_labels is not None %}
+    {% if predicted_label is not None %}
         <div class="alert alert-primary" role="alert">
-            Теги: <b>{{ predicted_labels }}</b>
+            Тег: <b>{{ predicted_label }}</b>
         </div>
     {% else %}
         <div class="alert alert-danger" role="alert">
-            Ошибка: теги не распознаны.
+            Ошибка: тег не распознан.
         </div>
     {% endif %}
 
