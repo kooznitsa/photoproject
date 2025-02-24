@@ -17,6 +17,7 @@ torchvision = "^0.21.0"
 torch = "^2.6.0"
 pillow = "^11.1.0"
 googletrans = "^4.0.2"
+flake8 = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

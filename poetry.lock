@@ -174,6 +174,19 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.6.10)", "diff-cover (>=9.2.1)",
 typing = ["typing-extensions (>=4.12.2)"]
 
 [[package]]
+name = "flake8"
+version = "7.1.2"
+description = "the modular source code checker: pep8 pyflakes and co"
+category = "main"
+optional = false
+python-versions = ">=3.8.1"
+
+[package.dependencies]
+mccabe = ">=0.7.0,<0.8.0"
+pycodestyle = ">=2.12.0,<2.13.0"
+pyflakes = ">=3.2.0,<3.3.0"
+
+[[package]]
 name = "fsspec"
 version = "2025.2.0"
 description = "File-system specification"
@@ -349,6 +362,14 @@ description = "Safely add untrusted strings to HTML/XML markup."
 category = "main"
 optional = false
 python-versions = ">=3.9"
+
+[[package]]
+name = "mccabe"
+version = "0.7.0"
+description = "McCabe checker, plugin for flake8"
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "mpmath"
@@ -539,6 +560,22 @@ optional = false
 python-versions = ">=3.8"
 
 [[package]]
+name = "pycodestyle"
+version = "2.12.1"
+description = "Python style guide checker"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "pyflakes"
+version = "3.2.0"
+description = "passive checker of Python programs"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
@@ -699,7 +736,7 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "c3e4e56a18314cbcb96eadded4109b3f6ec1a469c434c44a2b386d280951e418"
+content-hash = "053d8ab114e2f1f621533769c70cf02b172328b2426ceb306d06b1154a73cd37"
 
 [metadata.files]
 anyio = []
@@ -714,6 +751,7 @@ elasticsearch = []
 elasticsearch-dsl = []
 exceptiongroup = []
 filelock = []
+flake8 = []
 fsspec = []
 googletrans = []
 gunicorn = []
@@ -726,6 +764,7 @@ hyperframe = []
 idna = []
 jinja2 = []
 markupsafe = []
+mccabe = []
 mpmath = []
 networkx = []
 numpy = []
@@ -745,6 +784,8 @@ nvidia-nvtx-cu12 = []
 packaging = []
 pillow = []
 psycopg2-binary = []
+pycodestyle = []
+pyflakes = []
 python-dateutil = []
 python-dotenv = []
 six = []

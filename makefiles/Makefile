@@ -6,13 +6,13 @@ MANAGE = poetry run python manage.py
 # -------------- DOCKER --------------
 
 # Runs containers
-# DOCKER_PROFILE options: main, secondary. Example: make run DOCKER_PROFILE=main
+# DOCKER_PROFILE options: main, secondary. Example: make -f Makefile.local run DOCKER_PROFILE=main
 .PHONY: run
 run:
 	$(DOCKER_COMPOSE) $(DOCKER_PROFILE) up -d --build
 
 # Removes containers
-# DOCKER_PROFILE options: main, secondary. Example: make stop DOCKER_PROFILE=main
+# DOCKER_PROFILE options: main, secondary. Example: make -f Makefile.local stop DOCKER_PROFILE=main
 .PHONY: stop
 stop:
 	$(DOCKER_COMPOSE) $(DOCKER_PROFILE) down
@@ -21,3 +21,24 @@ stop:
 .PHONY: entercontainer
 entercontainer:
 	$(DOCKER_EXEC) sh
+
+
+# -------------- DJANGO --------------
+
+# Creates an app. Example: make startapp DJANGOAPP=album
+.PHONY: startapp
+startapp:
+	$(DOCKER_EXEC) $(MANAGE) startapp $(DJANGOAPP)
+
+# Creates superuser
+.PHONY: createsuperuser
+createsuperuser:
+	$(DOCKER_EXEC) $(MANAGE) createsuperuser --noinput
+
+
+# -------------- LINTER --------------
+
+# Checks code style
+.PHONY: linter
+linter:
+	$(DOCKER_EXEC) poetry run flake8 --max-line-length 88

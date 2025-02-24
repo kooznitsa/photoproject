@@ -34,6 +34,9 @@ json_path = os.path.join(settings.base.STATICFILES_DIRS[0], 'imagenet_class_inde
 imagenet_mapping = json.load(open(json_path))
 
 
+info_logger = logging.getLogger('info_logger')
+
+
 class UploadImageService:
     @staticmethod
     def upload(image: TemporaryUploadedFile) -> tuple[str, Optional[list]]:
